@@ -1,0 +1,65 @@
+model:
+  base_learning_rate: 5.0e-05
+  target: ldm.models.autoencoder.HazeAutoencoderKLResi
+  params:
+    embed_dim: 4
+    monitor: val/rec_loss
+
+    ckpt_path: "/disk8t/baijy/Stable_main_2/logs/2025-12-10T19-28-28_stage1/checkpoints/epoch=000012-v17.ckpt"
+
+    ddconfig:
+      double_z: True
+      z_channels: 4
+      resolution: 512
+      in_channels: 3
+      out_ch: 3
+      ch: 128
+      ch_mult:
+      - 1
+      - 2
+      - 4
+      - 4
+      num_res_blocks: 2
+      attn_resolutions: [128,64]
+      dropout: 0.0
+    lossconfig:
+      target: ldm.modules.losses.LPIPSWithDiscriminator
+      params:
+        disc_start: 6003       # 判别器起始 step
+        kl_weight: 0      # VAE KL 权重
+        pixelloss_weight: 1.0  # L1/L2 重建
+        perceptual_weight: 0.1 # LPIPS 权重
+        disc_weight: 0.015
+
+data:
+  target: main.DataModuleFromConfig
+  params:
+    batch_size: 2
+    num_workers: 2
+
+    train:
+      target: data.data.HazyPairDataset
+      params:
+        dataroot: /disk8t/baijy/dataset/Hazyset
+        size: 512
+        dynamic_m0: False
+
+    validation:
+      target: data.data.HazyPairDataset
+      params:
+        dataroot: /disk8t/baijy/dataset/Hazyval
+        size: 512
+        dynamic_m0: false
+
+
+lightning:
+  modelcheckpoint:
+    params:
+      every_n_train_steps: 200
+  callbacks:
+    image_logger:
+      target: main.ImageLogger
+      params:
+        batch_frequency: 1000
+        max_images: 1
+        increase_log_steps: False

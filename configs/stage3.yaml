@@ -1,0 +1,76 @@
+model:
+  base_learning_rate: 3.0e-05   # 建议比 stage1 更小，微调更稳
+  target: ldm.models.autoencoder.HazeAutoencoderKLResi
+  params:
+    embed_dim: 4
+    monitor: val/rec_loss
+
+    # 载入你原 stage1 的 ckpt（strict=False 下新增模块会 missing 是正常的）
+    ckpt_path: "/disk8t/baijy/Stable_main_2/logs/2025-12-10T19-28-28_stage1/checkpoints/epoch=000012-v17.ckpt"
+
+    # ✅ Stage3 冻结策略开关：按你修改后的 freeze_dec 逻辑
+    freeze_dec: True
+
+    ddconfig:
+      double_z: True
+      z_channels: 4
+      resolution: 512
+      in_channels: 3
+      out_ch: 3
+      ch: 128
+      ch_mult:
+      - 1
+      - 2
+      - 4
+      - 4
+      num_res_blocks: 2
+      attn_resolutions: [128, 64]
+      dropout: 0.0
+
+    lossconfig:
+      target: ldm.modules.losses.LPIPSWithDiscriminator
+      params:
+        disc_start: 3002
+        kl_weight: 0
+        pixelloss_weight: 1.0
+        perceptual_weight: 0.1
+        disc_weight: 0.015
+
+
+data:
+  target: main.DataModuleFromConfig
+  params:
+    batch_size: 2
+    num_workers: 2
+    wrap: false
+
+    train:
+      target: data.data.HazyPairDataset
+      params:
+        dataroot: /disk8t/baijy/dataset/Hazyset
+        size: 512
+        dynamic_m0: False
+
+    validation:
+      target: data.data.HazyPairDataset
+      params:
+        dataroot: /disk8t/baijy/dataset/Hazyval
+        size: 512
+        dynamic_m0: False
+
+
+lightning:
+  modelcheckpoint:
+    params:
+      every_n_train_steps: 220
+  callbacks:
+    image_logger:
+      target: main.ImageLogger
+      params:
+        batch_frequency: 220
+        max_images: 1
+        increase_log_steps: False
+  trainer:
+    benchmark: True
+    max_steps: 200000
+    accumulate_grad_batches: 2
