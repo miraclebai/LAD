@@ -1,5 +1,5 @@
 # LAD: Latent Anisotropic Diffusion Toward Image Dehazing
-This repository provides the official implementation and related resources for the paper "Anisotropic Haze Diffusion in Latent Space: A Physically Consistent Generative Paradigm for Image Dehazing"
+This repository provides the official implementation and related resources for the paper "LAD: Latent Anisotropic Diffusion Toward Image Dehazing"
 
 ## Overview
 
