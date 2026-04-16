@@ -1,5 +1,6 @@
 # LAD: Latent Anisotropic Diffusion Toward Image Dehazing
-This repository provides the official implementation and related resources for the paper "LAD: Latent Anisotropic Diffusion Toward Image Dehazing"
+This repository provides the official implementation and related resources for the paper "From Haze Degradation to Haze Evolution: A
+Physically Consistent Generative Framework for Image Dehazing"
 
 ## Overview
 
@@ -17,7 +18,3 @@ More detailed descriptions, usage instructions, and file explanations will be ad
 - [ ] Add training instructions
 - [ ] Add testing / inference instructions
 - [ ] Add dataset preparation instructions
-- [ ] Add checkpoint usage instructions
-- [ ] Add experiment configuration explanation
-- [ ] Add result reproduction steps
-- [ ] Add citation information
