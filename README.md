@@ -1,21 +1,20 @@
 # LAD
 
-本仓库是论文 *From Haze Degradation to Haze Evolution: A Physically Consistent Generative Framework for Image Dehazing* 的官方实现。
+This repository is the official implementation of the paper *From Haze Degradation to Haze Evolution: A Physically Consistent Generative Framework for Image Dehazing*.
 
-## 1. 仓库结构
+## 1. Repository Structure
 
-- [`configs/stage1.yaml`](https://github.com/miraclebai/LAD/blob/main/configs/stage1.yaml)：Stage1，自编码器预训练。
-- [`configs/stage2.yaml`](https://github.com/miraclebai/LAD/blob/main/configs/stage2.yaml)：Stage2，latent diffusion 训练。
-- [`configs/stage3.yaml`](https://github.com/miraclebai/LAD/blob/main/configs/stage3.yaml)：Stage3，冻结编码端后微调解码端、LCGM 和输出校正头。
-- [`configs/infer.yaml`](https://github.com/miraclebai/LAD/blob/main/configs/infer.yaml)：扩散推理配置模板。
-- [`data/data.py`](https://github.com/miraclebai/LAD/blob/main/data/data.py)：当前仓库实际用到的数据集定义。
-- [`hazy_mass/`](https://github.com/miraclebai/LAD/tree/main/hazy_mass)：DCP、DWT 与 haze mass map 计算。
-- [`MFlow/aniso_mflow.py`](https://github.com/miraclebai/LAD/blob/main/MFlow/aniso_mflow.py)：各向异性扩散驱动的 `M-Flow`。
-- [`motivation/`](https://github.com/miraclebai/LAD/tree/main/motivation)：论文动机图和可视化脚本，不参与主训练流程。
+- [`configs/stage1.yaml`](https://github.com/miraclebai/LAD/blob/main/configs/stage1.yaml): Stage 1, autoencoder pre-training.
+- [`configs/stage2.yaml`](https://github.com/miraclebai/LAD/blob/main/configs/stage2.yaml): Stage 2, latent diffusion training.
+- [`configs/stage3.yaml`](https://github.com/miraclebai/LAD/blob/main/configs/stage3.yaml): Stage 3, decoder fine-tuning with frozen encoder.
+- [`configs/infer.yaml`](https://github.com/miraclebai/LAD/blob/main/configs/infer.yaml): inference configuration.
+- [`data/data.py`](https://github.com/miraclebai/LAD/blob/main/data/data.py): dataset definitions used by the current training pipeline.
+- [`hazy_mass/`](https://github.com/miraclebai/LAD/tree/main/hazy_mass): DCP, DWT, and haze mass map computation.
+- [`MFlow/aniso_mflow.py`](https://github.com/miraclebai/LAD/blob/main/MFlow/aniso_mflow.py): anisotropic diffusion based `M-Flow` module.
 
-## 2. 数据格式
+## 2. Data Format
 
-当前提交版本的训练配置实际使用的是 [`data.data.HazyPairDataset`](https://github.com/miraclebai/LAD/blob/main/data/data.py)，目录格式必须是：
+The current training configuration uses [`data.data.HazyPairDataset`](https://github.com/miraclebai/LAD/blob/main/data/data.py). The dataset directory should be organized as follows:
 
 ```text
 your_dataset/
@@ -29,28 +28,28 @@ your_dataset/
     └── ...
 ```
 
-## 3. 训练前的配置调整
+## 3. Configuration Preparation
 
-这个仓库中多个配置文件保留了作者机器上的绝对路径。训练或推理前，请先替换这些字段，或者用命令行覆盖：
+Several configuration files still contain absolute paths from the original training environment. Before training or inference, please replace or override the following fields:
 
-- 数据路径：`data.params.train.params.dataroot`、`data.params.validation.params.dataroot`
-- Stage1 checkpoint：`model.params.ckpt_path`
-- Stage2 中 first-stage checkpoint：`model.params.first_stage_config.params.ckpt_path`
-- 推理配置中的 diffusion / first-stage checkpoint：`configs/infer.yaml` 内的 `ckpt_path`
+- Data path: `data.params.train.params.dataroot`, `data.params.validation.params.dataroot`
+- Stage 1 checkpoint: `model.params.ckpt_path`
+- Stage 2 first-stage checkpoint: `model.params.first_stage_config.params.ckpt_path`
+- Diffusion / first-stage checkpoint in inference: `ckpt_path` in `configs/infer.yaml`
 
-## 4. 训练
+## 4. Training
 
-训练入口统一是：
+The unified training entry is:
 
 ```bash
 python main.py -t True --base <config> --gpus 0,
 ```
 
-训练日志与模型权重默认保存在 `logs/<timestamp>_<name>/`。
+Training logs and checkpoints are saved to `logs/<timestamp>_<name>/` by default.
 
-### 4.1 Stage1：训练去雾自编码器
+### 4.1 Stage 1: Dehazing Autoencoder Training
 
-Stage1 目标是训练 [`HazeAutoencoderKLResi`](https://github.com/miraclebai/LAD/blob/main/ldm/models/autoencoder.py)，编码端自动计算 `M0` 并通过 `HazeAwareEncoder` 注入 M-Flow。
+Stage 1 trains [`HazeAutoencoderKLResi`](https://github.com/miraclebai/LAD/blob/main/ldm/models/autoencoder.py).
 
 ```bash
 python main.py -t True \
@@ -59,9 +58,9 @@ python main.py -t True \
   --name stage1 \
 ```
 
-### 4.2 Stage2：训练 latent diffusion
+### 4.2 Stage 2: Latent Diffusion Training
 
-Stage2 训练 [`ldm.models.diffusion.ddpm.HazeLatentDiffusion`](https://github.com/miraclebai/LAD/blob/main/ldm/models/diffusion/ddpm.py)。
+Stage 2 trains [`ldm.models.diffusion.ddpm.HazeLatentDiffusion`](https://github.com/miraclebai/LAD/blob/main/ldm/models/diffusion/ddpm.py).
 
 ```bash
 python main.py -t True \
@@ -70,9 +69,9 @@ python main.py -t True \
   --name stage2 \
 ```
 
-### 4.3 Stage3：微调解码端
+### 4.3 Stage 3: Decoder Fine-Tuning
 
-命令如下：
+The training command is:
 
 ```bash
 python main.py -t True \
@@ -81,14 +80,14 @@ python main.py -t True \
   --name stage3 \
 ```
 
-## 5. 推理
+## 5. Inference
 
-仓库提供两个推理脚本：
+The repository provides two inference scripts:
 
-- [`scripts/infer.py`](https://github.com/miraclebai/LAD/blob/main/scripts/infer.py)：固定分辨率推理。
-- [`scripts/infer_os.py`](https://github.com/miraclebai/LAD/blob/main/scripts/infer_os.py)：原始分辨率推理。
+- [`scripts/infer.py`](https://github.com/miraclebai/LAD/blob/main/scripts/infer.py): fixed-resolution inference.
+- [`scripts/infer_os.py`](https://github.com/miraclebai/LAD/blob/main/scripts/infer_os.py): original-resolution inference.
 
-### 5.1 固定分辨率推理
+### 5.1 Fixed-Resolution Inference
 
 ```bash
 python scripts/infer.py \
@@ -102,7 +101,7 @@ python scripts/infer.py \
   --colorfix_type wavelet
 ```
 
-### 5.2 原尺寸推理
+### 5.2 Original-Resolution Inference
 
 ```bash
 python scripts/infer_os.py \
