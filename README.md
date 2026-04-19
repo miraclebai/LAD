@@ -2,6 +2,10 @@
 
 This repository is the official implementation of the paper *From Haze Degradation to Haze Evolution: A Physically Consistent Generative Framework for Image Dehazing*.
 
+<p align="center">
+  <img src="assets/qualitative_results.pdf" alt="LAD qualitative results" width="100%">
+</p>
+
 ## 1. Repository Structure
 
 - [`configs/stage1.yaml`](https://github.com/miraclebai/LAD/blob/main/configs/stage1.yaml): Stage 1, autoencoder pre-training.
