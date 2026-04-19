@@ -2,8 +2,14 @@
 
 This repository is the official implementation of the paper *From Haze Degradation to Haze Evolution: A Physically Consistent Generative Framework for Image Dehazing*.
 
+## Qualitative Results
+
 <p align="center">
-  <img src="assets/qualitative_results.pdf" alt="LAD qualitative results" width="100%">
+  <img src="assets/qualitative_results.pdf" alt="Qualitative dehazing results" width="100%">
+</p>
+
+<p align="center">
+  Qualitative comparison of LAD on representative hazy scenes.
 </p>
 
 ## 1. Repository Structure
